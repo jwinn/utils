@@ -69,8 +69,7 @@ if [ $has_brew ]; then
 			r)  remove="$OPTARG";;
 			u)  update=1;;
 			U)  upgrade=1;;
-		  ?)  usage
-				  exit 2;;
+		  ?)  usage && exit 2;;
 		esac
 	done
 

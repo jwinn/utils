@@ -19,7 +19,7 @@ Usage $0: [-bDelv] [-d destination] [-E exclude_file] [-s source] args
 
 	-d:   the destination folder
 	      [default: RSYNC_DEST or {backup_mount}/{hostname}/{user}]
-	-e:   a plain text file newline-delimited for patterns to exclude
+	-E:   a plain text file newline-delimited for patterns to exclude
 	-s:   the source folder [default: RSYNC_SRC or HOME]
 
 	args: passed through to $has_rsync
@@ -43,19 +43,7 @@ if [ $has_rsync ]; then
 
 	backup_flags="-rlptDz"
 	delete_flags="--delete --delete-excluded"
-	exclude_flags="\\
-	--exclude '.*DS_Store' \\
-	--exclude '.atom' \\
-	--exclude '.cache' \\
-	--exclude '.dropbox' \\
-	--exclude '.node-gyp' \\
-	--exclude '.npm' \\
-	--exclude '.nvm' \\
-	--exclude '.vim*' \\
-	--exclude '.Trash' \\
-	--exclude 'Downloads' \\
-	--exclude 'Dropbox' \\
-"
+	exclude_flags="--exclude '.*DS_Store' --exclude '.node-gyp' --exclude '.Trash'"
 	link_flags="--safe-links"
 	test_flags="--dry-run"
 	verb_flags="-v --progress --human-readable"
@@ -72,17 +60,16 @@ if [ $has_rsync ]; then
 	while getopts bd:DeE:ls:tv opt; do
 		case $opt in
 			b)  backup=1;;
-			d)  dest="$OPTARGS";;
+			d)  dest="$OPTARG";;
 			D)  delete=1;;
 			e)  exclude=1;;
-			E)  file="$OPTARGS";;
+			E)  file="$OPTARG";;
 			h)  usage && exit;;
 			l)  link=1;;
-			d)  src="$OPTARGS";;
+			d)  src="$OPTARG";;
 			t)  dry_run=1;;
 			v)  verbose=1;;
-			?)  usage
-				  exit 2;;
+			?)  usage && exit 2;;
 		esac
 	done
 
@@ -122,7 +109,7 @@ if [ $has_rsync ]; then
 	fi
 
 	if [ -n "$file" ] && [ -r $file ]; then
-		command_args="$command_args --exclude-from \"$file\""
+		command_args="$command_args --exclude-from $file"
 	fi
 
 	if [ -n "$link" ]; then
