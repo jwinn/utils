@@ -122,7 +122,7 @@ if [ $has_rsync ]; then
 	fi
 
 	if [ -n "$file" ] && [ -r $file ]; then
-		command_args="$command_args --exclude-from=\"$file\""
+		command_args="$command_args --exclude-from \"$file\""
 	fi
 
 	if [ -n "$link" ]; then
@@ -142,7 +142,6 @@ if [ $has_rsync ]; then
 		$command_args="$command_args $args"
 	fi
 
-	command_args=${command_args%*\ }
 	echo "Running rsync $command_args $src $dest"
 	rsync $command_args "$src" "$dest"
 
