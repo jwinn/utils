@@ -37,25 +37,12 @@ upgrade() {
 	brew upgrade;
 }
 
-if [ $has_brew ]; then
-	clean=
-	doctor=
-	install=
-	remove=
-	update=
-	upgrade=
-	while getopts cduUi:r: opt; do
-		case $opt in
-			c)  clean=1;;
-			d)  doctor=1;;
-			i)  install="$OPTARG";;
-			r)  remove="$OPTARG";;
-			u)  update=1;;
-			U)  upgrade=1;;
-		  ?)  echo "
+usage() {
+	echo "
 Usage $0: [-cduU] [-i packages] [-r package] args
 	-c:   clean
 	-d:   doctor
+	-h:   show this dialog
 	-u:   update
 	-U:   upgrade
 
@@ -64,6 +51,25 @@ Usage $0: [-cduU] [-i packages] [-r package] args
 
 	args: passed through to $has_brew
 "
+}
+
+if [ $has_brew ]; then
+	clean=
+	doctor=
+	install=
+	remove=
+	update=
+	upgrade=
+	while getopts cdhuUi:r: opt; do
+		case $opt in
+			c)  clean=1;;
+			d)  doctor=1;;
+			h)  usage && exit;;
+			i)  install="$OPTARG";;
+			r)  remove="$OPTARG";;
+			u)  update=1;;
+			U)  upgrade=1;;
+		  ?)  usage
 				  exit 2;;
 		esac
 	done

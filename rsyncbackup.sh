@@ -6,6 +6,26 @@ has_pv=$(command -v pv || true)
 has_rsync=$(command -v rsync || true)
 has_time=$(command -v time || true)
 
+usage() {
+	echo "
+Usage $0: [-bDelv] [-d destination] [-E exclude_file] [-s source] args
+	-b:   backup [$backup_flags]
+	-D:   delete files-not in source or excluded-from estination [$delete_flags]
+	-e:   pre-defined excludes [$exclude_flags]
+	-h:   show this message
+	-l:   use safe links [$link_flags]
+	-t:   dry-run [$test_flags]
+	-v:   verbose [$verb_flags]
+
+	-d:   the destination folder
+	      [default: RSYNC_DEST or {backup_mount}/{hostname}/{user}]
+	-e:   a plain text file newline-delimited for patterns to exclude
+	-s:   the source folder [default: RSYNC_SRC or HOME]
+
+	args: passed through to $has_rsync
+"
+}
+
 if [ $has_rsync ]; then
 	hostname=${HOSTNAME:-$(hostname -s || uname -n)}
 	hostname=${hostname%%.*}
@@ -56,26 +76,12 @@ if [ $has_rsync ]; then
 			D)  delete=1;;
 			e)  exclude=1;;
 			E)  file="$OPTARGS";;
+			h)  usage && exit;;
 			l)  link=1;;
 			d)  src="$OPTARGS";;
 			t)  dry_run=1;;
 			v)  verbose=1;;
-			?)  echo "
-Usage $0: [-bDelv] [-d destination] [-E exclude_file] [-s source] args
-	-b:   backup [$backup_flags]
-	-D:   delete files-not in source or excluded-from estination [$delete_flags]
-	-e:   pre-defined excludes [$exclude_flags]
-	-l:   use safe links [$link_flags]
-	-t:   dry-run [$test_flags]
-	-v:   verbose [$verb_flags]
-
-	-d:   the destination folder
-	      [default: RSYNC_DEST or {backup_mount}/{hostname}/{user}]
-	-e:   a plain text file newline-delimited for patterns to exclude
-	-s:   the source folder [default: RSYNC_SRC or HOME]
-
-	args: passed through to $has_rsync
-"
+			?)  usage
 				  exit 2;;
 		esac
 	done
