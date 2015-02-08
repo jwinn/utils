@@ -2,7 +2,7 @@
 
 [ -n "$DEBUG" ] && set -x
 
-has_pv=$(command -v pv || true)
+has_grep=$(command -v grep || true)
 has_rsync=$(command -v rsync || true)
 has_time=$(command -v time || true)
 
@@ -18,7 +18,7 @@ Usage $0: [-bDelv] [-d destination] [-E exclude_file] [-s source] args
 	-v:   verbose [$verb_flags]
 
 	-d:   the destination folder
-	      [default: RSYNC_DEST or {backup_mount}/{hostname}/{user}]
+	      [default: RSYNC_DEST or {backup_mount}/{hostname}]
 	-E:   a plain text file newline-delimited for patterns to exclude
 	-s:   the source folder [default: RSYNC_SRC or HOME]
 
@@ -27,11 +27,16 @@ Usage $0: [-bDelv] [-d destination] [-E exclude_file] [-s source] args
 }
 
 if [ $has_rsync ]; then
+  if [ $has_grep ]; then
+		rsync_version=$(rsync --version \
+			| grep -Eo 'version [0-9]+.[0-9]+.[0-9]+' \
+			| grep -Eo '[0-9]+.[0-9]+.[0-9]+')
+		rsync_has_progress=$(echo ${rsync_version%.*} 3.1 \
+			| awk '{ if ($1 >= $2) print 1; else print 0 }')
+	fi
+
 	hostname=${HOSTNAME:-$(hostname -s || uname -n)}
 	hostname=${hostname%%.*}
-
-	user=${USER:-$(whoami)}
-	user=${user##*\\}
 
 	src=${RSYNC_SRC:-$HOME}
 	if [ "$(uname -s)" = "Darwin" ]; then
@@ -39,7 +44,7 @@ if [ $has_rsync ]; then
 	else
 		dest=${RSYNC_DEST:="/mnt/backup"}
 	fi
-	dest="$dest/$hostname/$user"
+	dest="$dest/$hostname"
 
 	backup_flags="-rlptDz"
 	delete_flags="--delete --delete-excluded"
@@ -122,6 +127,9 @@ if [ $has_rsync ]; then
 
 	if [ -n "$verbose" ]; then
 		command_args="$command_args $verb_flags"
+		if [ "$rsync_has_progress" -eq "1" ]; then
+			command_args="$command_args --info=progress2"
+		fi
 	fi
 
 	if [ -n "$args" ]; then
@@ -129,8 +137,13 @@ if [ $has_rsync ]; then
 		$command_args="$command_args $args"
 	fi
 
-	echo "Running rsync $command_args $src $dest"
-	rsync $command_args "$src" "$dest"
+	if [ $has_time ]; then
+		echo "Running: time rsync $command_args $src $dest"
+		time rsync $command_args $src $dest
+	else
+		echo "Running: rsync $command_args $src $dest"
+		rsync $command_args $src $dest
+	fi
 
 	exit 0
 fi
