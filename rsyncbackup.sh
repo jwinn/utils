@@ -59,6 +59,12 @@ if [ $has_rsync ]; then
 	exclude=
 	link=
 	verbose=
+
+	if [ -z "$*" ]; then
+		usage
+		exit
+	fi
+
 	while getopts bd:De:ls:tv opt; do
 		case $opt in
 			b)  backup=1;;

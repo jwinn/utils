@@ -60,6 +60,12 @@ if [ $has_brew ]; then
 	remove=
 	update=
 	upgrade=
+
+	if [ -z "$*" ]; then
+		usage
+		exit
+	fi
+
 	while getopts cdhuUi:r: opt; do
 		case $opt in
 			c)  clean=1;;
