@@ -8,10 +8,9 @@ has_time=$(command -v time || true)
 
 usage() {
 	echo "
-Usage $0: [-bDelv] [-d destination] [-E exclude_file] [-s source] args
+Usage $0: [-bDlv] [-d destination] [-e exclude_file] [-s source] args
 	-b:   backup [$backup_flags]
 	-D:   delete files-not in source or excluded-from estination [$delete_flags]
-	-e:   pre-defined excludes [$exclude_flags]
 	-h:   show this message
 	-l:   use safe links [$link_flags]
 	-t:   dry-run [$test_flags]
@@ -19,7 +18,7 @@ Usage $0: [-bDelv] [-d destination] [-E exclude_file] [-s source] args
 
 	-d:   the destination folder
 	      [default: RSYNC_DEST or {backup_mount}/{hostname}]
-	-E:   a plain text file newline-delimited for patterns to exclude
+	-e:   a plain text file newline-delimited for patterns to exclude
 	-s:   the source folder [default: RSYNC_SRC or HOME]
 
 	args: passed through to $has_rsync
@@ -48,7 +47,6 @@ if [ $has_rsync ]; then
 
 	backup_flags="-rlptDz"
 	delete_flags="--delete --delete-excluded"
-	exclude_flags="--exclude '.*DS_Store' --exclude '.node-gyp' --exclude '.Trash'"
 	link_flags="--safe-links"
 	test_flags="--dry-run"
 	verb_flags="-v --progress --human-readable"
@@ -59,16 +57,14 @@ if [ $has_rsync ]; then
 	delete=
 	dry_run=
 	exclude=
-	file=
 	link=
 	verbose=
-	while getopts bd:DeE:ls:tv opt; do
+	while getopts bd:De:ls:tv opt; do
 		case $opt in
 			b)  backup=1;;
 			d)  dest="$OPTARG";;
 			D)  delete=1;;
-			e)  exclude=1;;
-			E)  file="$OPTARG";;
+			e)  exclude="$OPTARG";;
 			h)  usage && exit;;
 			l)  link=1;;
 			d)  src="$OPTARG";;
@@ -109,12 +105,8 @@ if [ $has_rsync ]; then
 		command_args="$command_args $delete_flags"
 	fi
 
-	if [ -n "$exclude" ]; then
-		command_args="$command_args $exclude_flags"
-	fi
-
-	if [ -n "$file" ] && [ -r $file ]; then
-		command_args="$command_args --exclude-from $file"
+	if [ -n "$exclude" ] && [ -r $exclude ]; then
+		command_args="$command_args --exclude-from $exclude"
 	fi
 
 	if [ -n "$link" ]; then
