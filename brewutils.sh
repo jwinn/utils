@@ -4,57 +4,57 @@
 
 has_brew=$(command -v brew || true)
 
-clean() {
-  echo "Tidying up"
-  brew cleanup;
-}
+if [ $has_brew ]; then
+  clean() {
+    echo "Tidying up"
+    brew cleanup;
+  }
 
-doctor() {
-  echo "The doctor is in"
-  brew doctor;
-}
+  doctor() {
+    echo "The doctor is in"
+    brew doctor;
+  }
 
-install() {
-  install=$*
-  echo "Installing $install"
-  brew install $install
-}
+  install() {
+    install=$*
+    echo "Installing $install"
+    brew install $install
+  }
 
-remove() {
-  remove=$*
-  echo "Removing $remove"
-  brew remove $remove
-  has_deps=$(brew deps $remove)
-  [ $has_deps ] && brew remove $(join <(brew leaves) <(brew deps $remove))
-}
+  remove() {
+    remove=$*
+    echo "Removing $remove"
+    brew remove $remove
+    has_deps=$(brew deps $remove)
+    [ $has_deps ] && brew remove $(join <(brew leaves) <(brew deps $remove))
+  }
 
-update() {
-  echo "Updating available packages"
-  brew update;
-}
+  update() {
+    echo "Updating available packages"
+    brew update;
+  }
 
-upgrade() {
-  echo "Upgrading packages"
-  brew upgrade;
-}
+  upgrade() {
+    echo "Upgrading packages"
+    brew upgrade;
+  }
 
-usage() {
-  echo "
-  Usage $0: [-cduU] [-i packages] [-r package] args
+  usage() {
+    echo "
+Usage $0: [-cduU] [-i packages] [-r package] args
   -c:   clean
   -d:   doctor
   -h:   show this dialog
   -u:   update
   -U:   upgrade
 
-  -i:   packages can be a space-delimited set
-  -r:   packages can be a space-delimited set
+  -i:   install packages, can be a space-delimited set
+  -r:   remove packages, can be a space-delimited set
 
   args: passed through to $has_brew
-  "
-}
+    "
+  }
 
-if [ $has_brew ]; then
   clean=
   doctor=
   install=

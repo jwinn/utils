@@ -6,34 +6,7 @@ has_grep=$(command -v grep || true)
 has_rsync=$(command -v rsync || true)
 has_time=$(command -v time || true)
 
-usage() {
-  echo "
-  Usage $0: [-bDlv] [-d destination] [-e exclude_file] [-s source] args
-  -b:   backup [$backup_flags]
-  -D:   delete files-not in source or excluded-from estination [$delete_flags]
-  -h:   show this message
-  -l:   use safe links [$link_flags]
-  -t:   dry-run [$test_flags]
-  -v:   verbose [$verb_flags]
-
-  -d:   the destination folder
-  [default: RSYNC_DEST or {backup_mount}/{hostname}]
-  -e:   a plain text file newline-delimited for patterns to exclude
-  -s:   the source folder [default: RSYNC_SRC or HOME]
-
-  args: passed through to $has_rsync
-  "
-}
-
 if [ $has_rsync ]; then
-  if [ $has_grep ]; then
-    rsync_version=$(rsync --version \
-      | grep -Eo 'version [0-9]+.[0-9]+.[0-9]+' \
-      | grep -Eo '[0-9]+.[0-9]+.[0-9]+')
-    rsync_has_progress=$(echo ${rsync_version%.*} 3.1 \
-      | awk '{ if ($1 >= $2) print 1; else print 0 }')
-  fi
-
   hostname=${HOSTNAME:-$(hostname -s || uname -n)}
   hostname=${hostname%%.*}
 
@@ -51,6 +24,34 @@ if [ $has_rsync ]; then
   test_flags="--dry-run"
   verb_flags="-v --progress --human-readable"
 
+  usage() {
+    echo "
+Usage $0: [-bDlv] [-d destination] [-e exclude_file] [-s source] args
+  -b:   backup [$backup_flags]
+  -D:   delete files-not in source or excluded-from estination
+        [$delete_flags]
+  -h:   show this message
+  -l:   use safe links [$link_flags]
+  -t:   dry-run [$test_flags]
+  -v:   verbose [$verb_flags]
+
+  -d:   the destination folder
+        [default: RSYNC_DEST or ${dest}]
+  -e:   a plain text file newline-delimited for patterns to exclude
+  -s:   the source folder [default: RSYNC_SRC or HOME]
+
+  args: passed through to $has_rsync
+    "
+  }
+
+  if [ $has_grep ]; then
+    rsync_version=$(rsync --version \
+      | grep -Eo 'version [0-9]+.[0-9]+.[0-9]+' \
+      | grep -Eo '[0-9]+.[0-9]+.[0-9]+')
+    rsync_has_progress=$(echo ${rsync_version%.*} 3.1 \
+      | awk '{ if ($1 >= $2) print 1; else print 0 }')
+  fi
+
   command_args=""
 
   backup=
@@ -65,7 +66,7 @@ if [ $has_rsync ]; then
     exit
   fi
 
-  while getopts bd:De:ls:tv opt; do
+  while getopts bd:De:hls:tv opt; do
     case $opt in
       b)  backup=1;;
       d)  dest="$OPTARG";;
@@ -73,7 +74,7 @@ if [ $has_rsync ]; then
       e)  exclude="$OPTARG";;
       h)  usage && exit;;
       l)  link=1;;
-      d)  src="$OPTARG";;
+      s)  src="$OPTARG";;
       t)  dry_run=1;;
       v)  verbose=1;;
       ?)  usage && exit 2;;
