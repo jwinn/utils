@@ -41,7 +41,7 @@ Usage $0: [-bDlv] [-d destination] [-e exclude_file] [-s source] args
   -s:   the source folder [default: RSYNC_SRC or HOME]
 
   args: passed through to $has_rsync
-    "
+"
   }
 
   if [ $has_grep ]; then

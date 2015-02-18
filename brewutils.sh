@@ -7,7 +7,7 @@ has_brew=$(command -v brew || true)
 if [ $has_brew ]; then
   clean() {
     echo "Tidying up"
-    brew cleanup;
+    brew cleanup -s --force;
   }
 
   doctor() {
@@ -24,9 +24,9 @@ if [ $has_brew ]; then
   remove() {
     remove=$*
     echo "Removing $remove"
-    brew remove $remove
+    brew uninstall $remove
     has_deps=$(brew deps $remove)
-    [ $has_deps ] && brew remove $(join <(brew leaves) <(brew deps $remove))
+    [ $has_deps ] && brew uninstall $(join <(brew leaves) <(brew deps $remove))
   }
 
   update() {
@@ -52,7 +52,7 @@ Usage $0: [-cduU] [-i packages] [-r package] args
   -r:   remove packages, can be a space-delimited set
 
   args: passed through to $has_brew
-    "
+"
   }
 
   clean=
