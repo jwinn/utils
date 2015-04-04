@@ -37,3 +37,5 @@ node_modules
 npm-debug.log
 Downloads
 Dropbox
+Dash/DocSets
+
