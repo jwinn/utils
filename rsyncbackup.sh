@@ -26,7 +26,7 @@ if [ $has_rsync ]; then
 
   usage() {
     echo "
-Usage $0: [-bDlv] [-d destination] [-e exclude_file] [-s source] args
+Usage $0: [-bDlv] [-d destination] [-e exclude_file] [-s source] -- args
   -b:   backup [$backup_flags]
   -D:   delete files-not in source or excluded-from estination
         [$delete_flags]
@@ -132,7 +132,7 @@ if [ -n "$verbose" ]; then
 fi
 
 if [ -n "$args" ]; then
-  echo "Passing $args through to $has_brew"
+  echo "Passing \"$args\" through to $has_brew"
   $command_args="$command_args $args"
 fi
 

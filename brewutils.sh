@@ -18,15 +18,22 @@ if [ $has_brew ]; then
   install() {
     install=$*
     echo "Installing $install"
-    brew install $install
+    brew install $install $args
+  }
+
+  info() {
+    info=$*
+    brew info $info
   }
 
   remove() {
     remove=$*
     echo "Removing $remove"
-    brew uninstall $remove
+    brew rm $remove $args
     has_deps=$(brew deps $remove)
-    [ $has_deps ] && brew uninstall $(join <(brew leaves) <(brew deps $remove))
+    if [ $has_deps ]; then
+      brew rm $(join <(brew leaves) <(brew deps $remove))
+    fi
   }
 
   update() {
@@ -41,7 +48,7 @@ if [ $has_brew ]; then
 
   usage() {
     echo "
-Usage $0: [-cduU] [-i packages] [-r package] args
+Usage $0: [-cduU] [-i packages] [-I packages] [-r package] -- args
   -c:   clean
   -d:   doctor
   -h:   show this dialog
@@ -49,14 +56,16 @@ Usage $0: [-cduU] [-i packages] [-r package] args
   -U:   upgrade
 
   -i:   install packages, can be a space-delimited set
+  -I:   get info for packages, can be space-delimited set
   -r:   remove packages, can be a space-delimited set
 
-  args: passed through to $has_brew
+  args: passed through, if install, to $has_brew
 "
   }
 
   clean=
   doctor=
+  info=
   install=
   remove=
   update=
@@ -67,12 +76,13 @@ Usage $0: [-cduU] [-i packages] [-r package] args
     exit
   fi
 
-  while getopts cdhuUi:r: opt; do
+  while getopts cdhuUi:I:r: opt; do
     case $opt in
       c)  clean=1;;
       d)  doctor=1;;
       h)  usage && exit;;
       i)  install="$OPTARG";;
+      I)  info="$OPTARG";;
       r)  remove="$OPTARG";;
       u)  update=1;;
       U)  upgrade=1;;
@@ -82,6 +92,10 @@ Usage $0: [-cduU] [-i packages] [-r package] args
 
   shift $(($OPTIND - 1))
   args=$*
+
+  if [ -n "$args" ]; then
+    echo "Passing \"$args\" through to $has_brew"
+  fi
 
   if [ -n "$update" ]; then
     update
@@ -99,17 +113,16 @@ Usage $0: [-cduU] [-i packages] [-r package] args
     install $install
   fi
 
+  if [ -n "$info" ]; then
+    info $info
+  fi
+
   if [ -n "$clean" ]; then
     clean
   fi
 
   if [ -n "$doctor" ]; then
     doctor
-  fi
-
-  if [ -n "$args" ]; then
-    echo "Passing $args through to $has_brew"
-    brew $args
   fi
 
   exit 0
