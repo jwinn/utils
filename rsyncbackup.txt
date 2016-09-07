@@ -36,6 +36,6 @@ Saved\ Application\ State
 node_modules
 npm-debug.log
 Downloads
-Dropbox
+Dropbox*
 Dash/DocSets
 
