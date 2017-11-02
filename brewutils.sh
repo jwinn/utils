@@ -5,7 +5,9 @@
 has_brew=$(command -v brew || true)
 [ ! $has_brew ] && exit 1
 brew_home=$(brew --prefix)
-[ -d "${brew_home}/Library/Taps/caskroom/cask" ] && has_cask=1
+brew_tap_cask=$(brew tap | awk '/caskroom/{f=1} f{print; if (/}/) exit}' || false)
+#[ -d "${brew_home}/Library/Taps/caskroom/cask" ] && has_cask=1
+[ -n "${brew_tap_cask}" ] && has_cask=1
 
 clean() {
   echo "Tidying up"
@@ -48,7 +50,7 @@ update() {
 
 upgrade() {
   echo "Upgrading packages"
-  brew upgrade --all;
+  brew upgrade;
 }
 
 usage() {
