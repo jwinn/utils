@@ -17,7 +17,8 @@ clean() {
 
 doctor() {
   echo "The doctor is in"
-  brew doctor;
+  #brew doctor;
+  brew doctor `brew doctor --list-checks | grep -v stray_headers`
   # this is verbose send stdout to /dev/null
   [ $has_cask ] && brew cask doctor 1>/dev/null
 }
