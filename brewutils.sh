@@ -11,7 +11,7 @@ brew_tap_cask=$(brew tap | awk '/caskroom/{f=1} f{print; if (/}/) exit}' || fals
 
 clean() {
   echo "Tidying up"
-  brew cleanup -s --force;
+  brew cleanup -s;
   [ $has_cask ] && brew cask cleanup
 }
 
