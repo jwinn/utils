@@ -2,17 +2,17 @@
 
 [ -n "$DEBUG" ] && set -x
 
-has_brew=$(command -v brew || true)
-[ ! $has_brew ] && exit 1
-brew_home=$(brew --prefix)
-brew_tap_cask=$(brew tap | awk '/caskroom/{f=1} f{print; if (/}/) exit}' || false)
-#[ -d "${brew_home}/Library/Taps/caskroom/cask" ] && has_cask=1
-[ -n "${brew_tap_cask}" ] && has_cask=1
+brew=$(command -v brew || true)
+[ ! $brew ] && exit 1
+if [ -n "$(brew tap | grep 'cask')" ]; then
+  has_cask=1
+else
+  has_cask=0
+fi
 
 clean() {
   echo "Tidying up"
   brew cleanup -s;
-  [ $has_cask ] && brew cask cleanup
 }
 
 doctor() {
@@ -52,6 +52,7 @@ update() {
 upgrade() {
   echo "Upgrading packages"
   brew upgrade;
+  [ $has_cask ] && brew cask upgrade
 }
 
 usage() {
@@ -67,7 +68,7 @@ Usage $0: [-cduU] [-i packages] [-I packages] [-r package] -- args
   -I:   get info for packages, can be space-delimited set
   -r:   remove packages, can be a space-delimited set
 
-  args: passed through, if install, to $has_brew
+  args: passed through, if install, to $brew
 "
 }
 
@@ -102,7 +103,7 @@ shift $(($OPTIND - 1))
 args=$*
 
 if [ -n "$args" ]; then
-  echo "Passing \"$args\" through to $has_brew"
+  echo "Passing \"$args\" through to $brew"
 fi
 
 if [ -n "$update" ]; then
