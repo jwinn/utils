@@ -20,7 +20,7 @@ doctor() {
   #brew doctor;
   brew doctor `brew doctor --list-checks | grep -v stray_headers`
   # this is verbose send stdout to /dev/null
-  [ $has_cask ] && brew doctor --verbose 1>/dev/null
+  [ $has_cask ] && brew doctor 1>/dev/null
 }
 
 install() {
